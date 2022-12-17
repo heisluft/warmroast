@@ -26,7 +26,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.net.InetSocketAddress;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +42,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import com.opencsv.exceptions.CsvException;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
@@ -50,8 +50,6 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 import com.beust.jcommander.JCommander;
-import com.sun.tools.attach.AgentInitializationException;
-import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
@@ -66,7 +64,6 @@ public class WarmRoast extends TimerTask {
     private final Timer timer = new Timer("Roast Pan", true);
     private final McpMapping mapping = new McpMapping();
     private final SortedMap<String, StackNode> nodes = new TreeMap<>();
-    private JMXConnector connector;
     private MBeanServerConnection mbsc;
     private ThreadMXBean threadBean;
     private String filterThread;
@@ -110,23 +107,19 @@ public class WarmRoast extends TimerTask {
         this.endTime = l;
     }
 
-    public void connect() 
-            throws IOException, AgentLoadException, AgentInitializationException {
+    public void connect() throws IOException {
         // Load the agent
         String connectorAddr = vm.getAgentProperties().getProperty(
                 "com.sun.management.jmxremote.localConnectorAddress");
         if (connectorAddr == null) {
-            String agent = vm.getSystemProperties().getProperty("java.home")
-                    + File.separator + "lib" + File.separator
-                    + "management-agent.jar";
-            vm.loadAgent(agent);
+            vm.startLocalManagementAgent();
             connectorAddr = vm.getAgentProperties().getProperty(
                     "com.sun.management.jmxremote.localConnectorAddress");
         }
 
         // Connect
         JMXServiceURL serviceURL = new JMXServiceURL(connectorAddr);
-        connector = JMXConnectorFactory.connect(serviceURL);
+        JMXConnector connector = JMXConnectorFactory.connect(serviceURL);
         mbsc = connector.getMBeanServerConnection();
         try {
             threadBean = getThreadMXBean();
@@ -186,19 +179,17 @@ public class WarmRoast extends TimerTask {
         ResourceHandler resources = new ResourceHandler();
         String filesDir = WarmRoast.class.getResource("/www").toExternalForm();
         resources.setResourceBase(filesDir);
-        resources.setDirectoriesListed(true);
-        resources.setWelcomeFiles(new String[]{ "index.html" });
  
         HandlerList handlers = new HandlerList();
-        handlers.addHandler(context);
         handlers.addHandler(resources);
+        handlers.addHandler(context);
         server.setHandler(handlers);
 
         server.start();
         server.join();
     }
 
-    public static void main(String[] args) throws AgentLoadException {
+    public static void main(String[] args) {
         RoastOptions opt = new RoastOptions();
         JCommander jc = new JCommander(opt, args);
         jc.setProgramName("warmroast");
@@ -213,7 +204,7 @@ public class WarmRoast extends TimerTask {
         System.err.println("http://github.com/sk89q/warmroast");
         System.err.println(SEPARATOR);
         System.err.println("");
-        
+
         VirtualMachine vm = null;
         
         if (opt.pid != null) {
@@ -246,13 +237,7 @@ public class WarmRoast extends TimerTask {
             List<VirtualMachineDescriptor> descriptors = VirtualMachine.list();
             System.err.println("Choose a VM:");
             
-            Collections.sort(descriptors, new Comparator<VirtualMachineDescriptor>() {
-                @Override
-                public int compare(VirtualMachineDescriptor o1,
-                        VirtualMachineDescriptor o2) {
-                    return o1.displayName().compareTo(o2.displayName());
-                }
-            });
+            descriptors.sort(Comparator.comparing(VirtualMachineDescriptor::displayName));
             
             // Print list of VMs
             int i = 1;
@@ -301,7 +286,7 @@ public class WarmRoast extends TimerTask {
             File methods = new File(dir, "methods.csv");
             try {
                 roast.getMapping().read(joined, methods);
-            } catch (IOException e) {
+            } catch (IOException | CsvException e) {
                 System.err.println(
                         "Failed to read the mappings files (joined.srg, methods.csv) " +
                         "from " + dir.getAbsolutePath() + ": " + e.getMessage());

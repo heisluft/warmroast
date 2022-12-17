@@ -21,15 +21,15 @@ package com.sk89q.warmroast;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.FileUtils;
-
-import au.com.bytecode.opencsv.CSVReader;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 
 public class McpMapping {
 
@@ -46,7 +46,7 @@ public class McpMapping {
         return classes.get(obfuscated);
     }
 
-    public void read(File joinedFile, File methodsFile) throws IOException {
+    public void read(File joinedFile, File methodsFile) throws IOException, CsvException {
         try (FileReader r = new FileReader(methodsFile)) {
             try (CSVReader reader = new CSVReader(r)) {
                 List<String[]> entries = reader.readAll();
@@ -54,7 +54,7 @@ public class McpMapping {
             }
         }
         
-        List<String> lines = FileUtils.readLines(joinedFile, "UTF-8");
+        List<String> lines = Files.readAllLines(joinedFile.toPath());
         processClasses(lines);
         processMethods(lines);
     }

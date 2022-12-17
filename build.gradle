@@ -1,0 +1,23 @@
+plugins {
+  id 'java'
+}
+
+group 'com.sk89q'
+version '1.0.0-SNAPSHOT'
+
+java.toolchain(t -> t.getLanguageVersion().set(JavaLanguageVersion.of(11)))
+
+tasks.withType(JavaCompile) {
+  options.encoding = 'UTF-8'
+  sourceCompatibility = targetCompatibility = '1.8'
+}
+
+repositories.mavenCentral()
+
+dependencies {
+  implementation 'org.eclipse.jetty:jetty-servlet:11.0.13'
+  implementation 'com.opencsv:opencsv:5.7.1'
+  implementation 'com.beust:jcommander:1.82'
+  implementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.19.0'
+  implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
+}

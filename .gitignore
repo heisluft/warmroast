@@ -6,27 +6,25 @@
 # netbeans
 /nbproject
 
-# we use maven!
-/build.xml
+# intellij
+*.iml
+*.ipr
+*.iws
+/.idea/
+/out/
+/bin/
 
-# maven
-/target
+# we use gradle!
+/build/
+/.gradle/
 
 # vim
 .*.sw[a-p]
 
 # various other potential build files
-/build
-/bin
 /dist
 /manifest.mf
 /dependency-reduced-pom.xml
 
 # Mac filesystem dust
 /.DS_Store
-
-# intellij
-*.iml
-*.ipr
-*.iws
-.idea/
