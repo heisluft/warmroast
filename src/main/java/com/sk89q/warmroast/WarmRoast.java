@@ -193,7 +193,7 @@ public class WarmRoast extends TimerTask {
         }
 
         System.err.println(SEPARATOR);
-        System.err.println("WarmRoast 1.2");
+        System.err.println("WarmRoast 2.0.0");
         System.err.println("http://github.com/heisluft/warmroast");
         System.err.println(SEPARATOR);
         System.err.println("");

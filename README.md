@@ -2,7 +2,6 @@
 **Note**: This fork is a more bare version of the original and may or may not be useful for anyone
 except me.
 
-
 WarmRoast is an easy-to-use CPU sampling tool for JVM applications, but particularly suited for Minecraft servers/clients.
 
 * Adjustable sampling frequency.
@@ -17,25 +16,23 @@ Java 8 and above is required to use WarmRoast.
 
 ## Changes of this fork
 - Switched to Gradle
-- Requires Java 8 to run
+- Improved Client/Server separation and reduce bandwidth by switching to a REST-based servlet
+- Sped up loading times by lazily loading GUI elements 
+- Bumped required Java version to Java 8
 - It is no longer required to know your jdk location, WarmRoast should work out of the box now
 - Mappings are not supported for now, MCP mappings are not applicable for my work and add unneeded clutter
 
-
 ## Screenshots
-
 ![Sample output](http://i.imgur.com/Iy7kJ7f.png)
 
 ## Usage
-
 1. Download WarmRoast.
 2. In your shell, run the following command:
-```java -jar warmroast-1.1.0--thread "Server thread"```
+```java -jar warmroast-2.0.0-all.jar --thread "Server thread"```
 
 **Note:** The example command line below includes `--thread "Server thread"`, which filters all threads but the main server thread. You can remove it to show all threads.
 
 ## Parameters
-
     Usage: warmroast [options]
       Options:
         --bind
@@ -68,5 +65,4 @@ Java 8 and above is required to use WarmRoast.
 Hint: `--thread "Server thread"` is useful for Minecraft servers.
 
 ## License
-
 The project is licensed under the GNU General Public License, version 3.
