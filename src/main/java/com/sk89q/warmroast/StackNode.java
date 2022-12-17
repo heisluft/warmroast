@@ -47,7 +47,7 @@ public class StackNode implements Comparable<StackNode> {
         return name;
     }
     
-    public String getNameHtml(McpMapping mapping) {
+    public String getNameHtml() {
         return escapeHtml(getName());
     }
 
@@ -105,10 +105,10 @@ public class StackNode implements Comparable<StackNode> {
         return getName().compareTo(o.getName());
     }
     
-    private void writeHtml(StringBuilder builder, McpMapping mapping, long totalTime) {
+    private void writeHtml(StringBuilder builder, long totalTime) {
         builder.append("<div class=\"node collapsed\">");
         builder.append("<div class=\"name\">");
-        builder.append(getNameHtml(mapping));
+        builder.append(getNameHtml());
         builder.append("<span class=\"percent\">");
         builder
                 .append(String.format("%.2f", getTotalTime() / (double) totalTime * 100))
@@ -127,16 +127,16 @@ public class StackNode implements Comparable<StackNode> {
         builder.append("<ul class=\"children\">");
         for (StackNode child : getChildren()) {
             builder.append("<li>");
-            child.writeHtml(builder, mapping, totalTime);
+            child.writeHtml(builder, totalTime);
             builder.append("</li>");
         }
         builder.append("</ul>");
         builder.append("</div>");
     }
 
-    public String toHtml(McpMapping mapping) {
+    public String toHtml() {
         StringBuilder builder = new StringBuilder();
-        writeHtml(builder, mapping, getTotalTime());
+        writeHtml(builder, getTotalTime());
         return builder.toString();
     }
     

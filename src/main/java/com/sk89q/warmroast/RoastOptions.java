@@ -40,9 +40,6 @@ public class RoastOptions {
     @Parameter(names = { "-t", "--thread" }, description = "Optionally specify a thread to log only")
     public String threadName;
 
-    @Parameter(names = { "-m", "--mappings" }, description = "A directory with joined.srg and methods.csv")
-    public String mappingsDir;
-
     @Parameter(names = { "--interval" }, description = "The sample rate, in milliseconds")
     public Integer interval = 100;
     

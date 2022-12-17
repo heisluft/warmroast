@@ -42,7 +42,6 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import com.opencsv.exceptions.CsvException;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
@@ -62,7 +61,6 @@ public class WarmRoast extends TimerTask {
     private final int interval;
     private final VirtualMachine vm;
     private final Timer timer = new Timer("Roast Pan", true);
-    private final McpMapping mapping = new McpMapping();
     private final SortedMap<String, StackNode> nodes = new TreeMap<>();
     private MBeanServerConnection mbsc;
     private ThreadMXBean threadBean;
@@ -85,10 +83,6 @@ public class WarmRoast extends TimerTask {
             nodes.put(name, node);
         }
         return node;
-    }
-    
-    public McpMapping getMapping() {
-        return mapping;
     }
     
     public String getFilterThread() {
@@ -280,19 +274,6 @@ public class WarmRoast extends TimerTask {
         InetSocketAddress address = new InetSocketAddress(opt.bindAddress, opt.port);
 
         WarmRoast roast = new WarmRoast(vm, opt.interval);
-        if (opt.mappingsDir != null) {
-            File dir = new File(opt.mappingsDir);
-            File joined = new File(dir, "joined.srg");
-            File methods = new File(dir, "methods.csv");
-            try {
-                roast.getMapping().read(joined, methods);
-            } catch (IOException | CsvException e) {
-                System.err.println(
-                        "Failed to read the mappings files (joined.srg, methods.csv) " +
-                        "from " + dir.getAbsolutePath() + ": " + e.getMessage());
-                System.exit(2);
-            }
-        }
 
         System.err.println(SEPARATOR);
         

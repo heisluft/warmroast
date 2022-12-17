@@ -51,7 +51,7 @@ public class DataViewServlet extends HttpServlet {
         synchronized (roast) {
             Collection<StackNode> nodes = roast.getData().values();
             for (StackNode node : nodes) {
-                w.println(node.toHtml(roast.getMapping()));
+                w.println(node.toHtml());
             }
             if (nodes.size() == 0) {
                 w.println("<p class=\"no-results\">There are no results. " +
@@ -59,10 +59,7 @@ public class DataViewServlet extends HttpServlet {
             }
         }
         w.println("</div>");
-        w.println("<p class=\"legend\">Legend: ");
-        w.println("<span class=\"matched\">Mapped</span> ");
-        w.println("<span class=\"multiple-matches\">Multiple Mappings</span> ");
-        w.println("</p>");
+        w.println("</br>");
         w.println("<div id=\"overlay\"></div>");
         w.println("<p class=\"footer\">");
         w.println("Icons from <a href=\"http://www.fatcow.com/\">FatCow</a> &mdash; ");

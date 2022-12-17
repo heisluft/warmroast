@@ -1,10 +1,11 @@
-WarmRoast
-=========
+# WarmRoast
+**Note**: This fork is a more bare version of the original and may or may not be useful for anyone
+except me.
+
 
 WarmRoast is an easy-to-use CPU sampling tool for JVM applications, but particularly suited for Minecraft servers/clients.
 
 * Adjustable sampling frequency.
-* Supports loading MCP mappings for deobfuscating class and method names.
 * Web-based — perform the profiling on a remote server and view the results in your browser.
  * Collapse and expand nodes to see details.
  * Easily view CPU usage per method at a glance.
@@ -12,43 +13,28 @@ WarmRoast is an easy-to-use CPU sampling tool for JVM applications, but particul
  * See the percentage of CPU time for each method relative to its parent methods.
  * Maintains style and function with use of "File -> Save As" (in tested browsers).
 
-**Download Latest Version:** http://builds.enginehub.org/job/warmroast/last-successful/
+Java 8 and above is required to use WarmRoast.
 
-Java 7 and above is required to use WarmRoast.
+## Changes of this fork
+- Switched to Gradle
+- Requires Java 8 to run
+- It is no longer required to know your jdk location, WarmRoast should work out of the box now
+- Mappings are not supported for now, MCP mappings are not applicable for my work and add unneeded clutter
 
-Screenshots
------------
+
+## Screenshots
 
 ![Sample output](http://i.imgur.com/Iy7kJ7f.png)
 
-Usage
------
+## Usage
 
-1. Note the path of your JDK.
-
-2. Download WarmRoast.
-
-3. Replace `PATH_TO_JDK` in the following commands with the path to your JDK and execute the program.
+1. Download WarmRoast.
+2. In your shell, run the following command:
+```java -jar warmroast-1.1.0--thread "Server thread"```
 
 **Note:** The example command line below includes `--thread "Server thread"`, which filters all threads but the main server thread. You can remove it to show all threads.
 
-**Modded/vanilla servers:** If you are using a modded server, get a copy of [MCP](http://mcp.ocean-labs.de/index.php/MCP_Releases) for your server's Minecraft version, copy the files from conf/ somewhere, and point WarmRoast to it with `--mappings path/to/folder`. This helps readability a lot. Bukkit uses its own mapping, so a pure non-modded Bukkit server can't use MCP mappings.
-
-### Linux ###
-
-    java -Djava.library.path=PATH_TO_JDK/jre/bin -cp PATH_TO_JDK/lib/tools.jar:warmroast-1.0.0-SNAPSHOT.jar com.sk89q.warmroast.WarmRoast --thread "Server thread"
-
-### Windows ###
-
-An example `PATH_TO_JDK` would be `C:\Program Files\Java\jdk1.7.0_45`
-
-    java -Djava.library.path=PATH_TO_JDK/jre/bin -cp PATH_TO_JDK/lib/tools.jar;warmroast-1.0.0-SNAPSHOT.jar com.sk89q.warmroast.WarmRoast --thread "Server thread"
-
-* The folder `PATH_TO_JDK/jre/bin` should contain "attach.dll"
-* The folder `PATH_TO_JDK/lib` should contain "tools.jar"
-
-Parameters
-----------
+## Parameters
 
     Usage: warmroast [options]
       Options:
@@ -62,9 +48,6 @@ Parameters
         --interval
            The sample rate, in milliseconds
            Default: 100
-           
-        -m, --mappings
-           A directory with joined.srg and methods.csv
            
         --name
            The name of the VM to attach to
@@ -84,7 +67,6 @@ Parameters
 
 Hint: `--thread "Server thread"` is useful for Minecraft servers.
 
-License
--------
+## License
 
 The project is licensed under the GNU General Public License, version 3.
