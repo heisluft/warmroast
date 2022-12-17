@@ -19,7 +19,6 @@
 package com.sk89q.warmroast;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
@@ -168,7 +167,7 @@ public class WarmRoast extends TimerTask {
 
         ServletContextHandler context = new ServletContextHandler();
         context.setContextPath("/");
-        context.addServlet(new ServletHolder(new DataViewServlet(this)), "/stack");
+        context.addServlet(new ServletHolder(new RestServlet(this)), "/data");
 
         ResourceHandler resources = new ResourceHandler();
         String filesDir = WarmRoast.class.getResource("/www").toExternalForm();
@@ -194,8 +193,8 @@ public class WarmRoast extends TimerTask {
         }
 
         System.err.println(SEPARATOR);
-        System.err.println("WarmRoast");
-        System.err.println("http://github.com/sk89q/warmroast");
+        System.err.println("WarmRoast 1.2");
+        System.err.println("http://github.com/heisluft/warmroast");
         System.err.println(SEPARATOR);
         System.err.println("");
 

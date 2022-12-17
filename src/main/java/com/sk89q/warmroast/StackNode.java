@@ -18,26 +18,20 @@
 
 package com.sk89q.warmroast;
 
-import java.text.NumberFormat;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class StackNode implements Comparable<StackNode> {
-    
-    private static final NumberFormat cssDec = NumberFormat.getPercentInstance(Locale.US);
+
     private final String name;
     private final Map<String, StackNode> children = new HashMap<>();
     private long totalTime;
-    
-    static {
-        cssDec.setGroupingUsed(false);
-        cssDec.setMaximumFractionDigits(2);
-    }
 
     public StackNode(String name) {
         this.name = name;
@@ -46,12 +40,8 @@ public class StackNode implements Comparable<StackNode> {
     public String getName() {
         return name;
     }
-    
-    public String getNameHtml() {
-        return escapeHtml(getName());
-    }
 
-    public Collection<StackNode> getChildren() {
+    private Collection<StackNode> getChildren() {
         List<StackNode> list = new ArrayList<>(children.values());
         Collections.sort(list);
         return list;
@@ -66,7 +56,7 @@ public class StackNode implements Comparable<StackNode> {
         return child;
     }
     
-    public StackNode getChild(String className, String methodName) {
+    private StackNode getChild(String className, String methodName) {
         StackTraceNode node = new StackTraceNode(className, methodName);
         StackNode child = children.get(node.getName());
         if (child == null) {
@@ -80,7 +70,7 @@ public class StackNode implements Comparable<StackNode> {
         return totalTime;
     }
 
-    public void log(long time) {
+    private void log(long time) {
         totalTime += time;
     }
     
@@ -104,42 +94,26 @@ public class StackNode implements Comparable<StackNode> {
     public int compareTo(StackNode o) {
         return getName().compareTo(o.getName());
     }
-    
-    private void writeHtml(StringBuilder builder, long totalTime) {
-        builder.append("<div class=\"node collapsed\">");
-        builder.append("<div class=\"name\">");
-        builder.append(getNameHtml());
-        builder.append("<span class=\"percent\">");
-        builder
-                .append(String.format("%.2f", getTotalTime() / (double) totalTime * 100))
-                .append("%");
-        builder.append("</span>");
-        builder.append("<span class=\"time\">");
-        builder.append(getTotalTime()).append("ms");
-        builder.append("</span>");
-        builder.append("<span class=\"bar\">");
-        builder.append("<span class=\"bar-inner\" style=\"width:")
-                .append(formatCssPct(getTotalTime() / (double) totalTime))
-                .append("\">");
-        builder.append("</span>");
-        builder.append("</span>");
-        builder.append("</div>");
-        builder.append("<ul class=\"children\">");
-        for (StackNode child : getChildren()) {
-            builder.append("<li>");
-            child.writeHtml(builder, totalTime);
-            builder.append("</li>");
-        }
-        builder.append("</ul>");
-        builder.append("</div>");
+
+    public void writeJSON(PrintWriter out) {
+        writeJSON(out, getTotalTime());
     }
 
-    public String toHtml() {
-        StringBuilder builder = new StringBuilder();
-        writeHtml(builder, getTotalTime());
-        return builder.toString();
+    private void writeJSON(PrintWriter out, long totalTime) {
+        out.write("\"");
+        out.write(name.replace("\\", "\\\\").replace("\"", "\\\""));
+        out.write("\":{\"timeMs\":");
+        out.write(Long.toString(getTotalTime()));
+        out.write(",\"percent\":");
+        out.write(String.format("%.2f", getTotalTime() / (double) totalTime * 100));
+        out.write(",\"children\":{");
+        for(Iterator<StackNode> it = getChildren().iterator(); it.hasNext();) {
+            it.next().writeJSON(out, totalTime);
+            if(it.hasNext()) out.write(',');
+        }
+        out.write("}}");
     }
-    
+
     private void writeString(StringBuilder builder, int indent) {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < indent; i++) {
@@ -162,13 +136,4 @@ public class StackNode implements Comparable<StackNode> {
         writeString(builder, 0);
         return builder.toString();
     }
-    
-    protected static String formatCssPct(double pct) {
-        return cssDec.format(pct);
-    }
-    
-    protected static String escapeHtml(String str) {
-        return str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
-    }
-
 }
