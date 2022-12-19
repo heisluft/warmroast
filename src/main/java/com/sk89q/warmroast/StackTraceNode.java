@@ -18,28 +18,14 @@
 
 package com.sk89q.warmroast;
 
-public class StackTraceNode extends StackNode {
-    
-    private final String className;
-    private final String methodName;
+class StackTraceNode extends StackNode {
 
-    public StackTraceNode(String className, String methodName) {
+    StackTraceNode(String className, String methodName) {
         super(className + "." + methodName + "()");
-        this.className = className;
-        this.methodName = methodName;
-    }
-
-    public String getClassName() {
-        return className;
-    }
-
-    public String getMethodName() {
-        return methodName;
     }
 
     @Override
     public int compareTo(StackNode o) {
-        return Long.compare(o.getTotalTime(), getTotalTime());
+        return Long.compare(o.totalTime, totalTime);
     }
-
 }

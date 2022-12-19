@@ -28,6 +28,7 @@ import java.net.InetSocketAddress;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.Timer;
@@ -83,17 +84,9 @@ public class WarmRoast extends TimerTask {
         }
         return node;
     }
-    
-    public String getFilterThread() {
-        return filterThread;
-    }
 
     public void setFilterThread(String filterThread) {
         this.filterThread = filterThread;
-    }
-
-    public long getEndTime() {
-        return endTime;
     }
 
     public void setEndTime(long l) {
@@ -121,14 +114,11 @@ public class WarmRoast extends TimerTask {
         }
     }
 
-    private ThreadMXBean getThreadMXBean() 
-            throws IOException, MalformedObjectNameException {
+    private ThreadMXBean getThreadMXBean() throws IOException, MalformedObjectNameException {
         ObjectName objName = new ObjectName(ManagementFactory.THREAD_MXBEAN_NAME);
         Set<ObjectName> mbeans = mbsc.queryNames(objName, null);
-        for (ObjectName name : mbeans) {
-            return ManagementFactory.newPlatformMXBeanProxy(
-                    mbsc, name.toString(), ThreadMXBean.class);
-        }
+        for (ObjectName name : mbeans)
+            return ManagementFactory.newPlatformMXBeanProxy(mbsc, name.toString(), ThreadMXBean.class);
         throw new IOException("No thread MX bean found");
     }
 
@@ -170,7 +160,7 @@ public class WarmRoast extends TimerTask {
         context.addServlet(new ServletHolder(new RestServlet(this)), "/data");
 
         ResourceHandler resources = new ResourceHandler();
-        String filesDir = WarmRoast.class.getResource("/www").toExternalForm();
+        String filesDir = Objects.requireNonNull(WarmRoast.class.getResource("/www")).toExternalForm();
         resources.setResourceBase(filesDir);
  
         HandlerList handlers = new HandlerList();
@@ -184,8 +174,9 @@ public class WarmRoast extends TimerTask {
 
     public static void main(String[] args) {
         RoastOptions opt = new RoastOptions();
-        JCommander jc = new JCommander(opt, args);
+        JCommander jc = new JCommander(opt);
         jc.setProgramName("warmroast");
+        jc.parse(args);
         
         if (opt.help) {
             jc.usage();
@@ -194,9 +185,9 @@ public class WarmRoast extends TimerTask {
 
         System.err.println(SEPARATOR);
         System.err.println("WarmRoast 2.0.0");
-        System.err.println("http://github.com/heisluft/warmroast");
+        System.err.println("https://github.com/heisluft/warmroast");
         System.err.println(SEPARATOR);
-        System.err.println("");
+        System.err.println();
 
         VirtualMachine vm = null;
         
@@ -239,7 +230,7 @@ public class WarmRoast extends TimerTask {
             }
             
             // Ask for choice
-            System.err.println("");
+            System.err.println();
             System.err.print("Enter choice #: ");
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             String s;
@@ -253,17 +244,17 @@ public class WarmRoast extends TimerTask {
             try {
                 int choice = Integer.parseInt(s) - 1;
                 if (choice < 0 || choice >= descriptors.size()) {
-                    System.err.println("");
+                    System.err.println();
                     System.err.println("Given choice is out of range.");
                     System.exit(1);
                 }
                 vm = VirtualMachine.attach(descriptors.get(choice));
             } catch (NumberFormatException e) {
-                System.err.println("");
+                System.err.println();
                 System.err.println("That's not a number. Bye.");
                 System.exit(1);
             } catch (AttachNotSupportedException | IOException e) {
-                System.err.println("");
+                System.err.println();
                 System.err.println("Failed to attach VM");
                 e.printStackTrace();
                 System.exit(1);
@@ -283,7 +274,7 @@ public class WarmRoast extends TimerTask {
             System.err.println("Sampling set to stop in " + opt.timeout + " seconds.");
         }
 
-        System.err.println("Starting a server on " + address.toString() + "...");
+        System.err.println("Starting a server on " + address + "...");
         System.err.println("Once the server starts (shortly), visit the URL in your browser.");
         System.err.println("Note: The longer you wait before using the output of that " +
         		"webpage, the more accurate the results will be.");

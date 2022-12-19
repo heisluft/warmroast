@@ -1,22 +1,28 @@
 "use-strict";
 var json = {};
-let overlay = document.querySelector("#overlay");
+let overlay = document.getElementById("overlay");
+let loadDiv = document.getElementsByClassName("loading")[0];
+let stackDiv = document.getElementsByClassName("stack")[0];
 
-const xhttp = new XMLHttpRequest();
-xhttp.onload = function() {
-    const loadDiv = document.getElementsByClassName("loading")[0];
-    if(this.status >= 400) {
-        loadDiv.innerHTML = "Error " + this.status + " encountered from backend!";
-        return;
+function loadFromServer() {
+    let xhttp = new XMLHttpRequest();
+    xhttp.onload = function () {
+        if (this.status >= 400) {
+            loadDiv.innerHTML = "Error " + this.status + " encountered from backend!";
+            return;
+        }
+        onReceiveData(this.responseText);
     }
-    const stackDiv = document.getElementsByClassName("stack")[0];
-    json = JSON.parse(this.responseText);
+    xhttp.open("GET", "/data", true);
+    xhttp.send();
+}
+
+function onReceiveData(data) {
+    json = JSON.parse(data);
     processJson(stackDiv);
     stackDiv.style.display = "block";
     loadDiv.style.display = "none";
 }
-xhttp.open("GET", "/data", true);
-xhttp.send();
 
 let slideUp = (target, duration=500) => {
     target.style.transitionProperty = 'height, margin, padding';
@@ -25,11 +31,11 @@ let slideUp = (target, duration=500) => {
     target.style.height = target.offsetHeight + 'px';
     target.offsetHeight;
     target.style.overflow = 'hidden';
-    target.style.height = 0;
-    target.style.paddingTop = 0;
-    target.style.paddingBottom = 0;
-    target.style.marginTop = 0;
-    target.style.marginBottom = 0;
+    target.style.height = '0';
+    target.style.paddingTop = '0';
+    target.style.paddingBottom = '0';
+    target.style.marginTop = '0';
+    target.style.marginBottom = '0';
     window.setTimeout( () => {
         target.style.display = 'none';
         target.style.removeProperty('height');
@@ -51,11 +57,11 @@ let slideDown = (target, duration=500) => {
     target.style.display = display;
     let height = target.offsetHeight;
     target.style.overflow = 'hidden';
-    target.style.height = 0;
-    target.style.paddingTop = 0;
-    target.style.paddingBottom = 0;
-    target.style.marginTop = 0;
-    target.style.marginBottom = 0;
+    target.style.height = '0';
+    target.style.paddingTop = '0';
+    target.style.paddingBottom = '0';
+    target.style.marginTop = '0';
+    target.style.marginBottom = '0';
     target.offsetHeight;
     target.style.boxSizing = 'border-box';
     target.style.transitionProperty = "height, margin, padding";
@@ -73,13 +79,14 @@ let slideDown = (target, duration=500) => {
     }, duration);
 }
 
-function nameClicked(e) {
+function nameClicked() {
     let parent = this.parentElement;
     let childList = parent.getElementsByTagName("ul")[0];
     if (parent.classList.contains("collapsed")) {
         parent.classList.remove("collapsed");
         if(!childList.classList.contains("loaded")) { // Load children dynamically so we can be faster than the old servlet
-            var o = parent, keys = [];
+            var o = parent;
+            let keys = [];
             while (!o.classList.contains("stack")) {
                 if(o.classList.contains("node")) keys.push(o.firstElementChild.id);
                 o = o.parentElement;
@@ -101,7 +108,7 @@ function processNode(name, node, parent, depth = 2, wrap = false) {
     div.className = 'node collapsed';
     nameDiv.className = 'name';
     nameDiv.id = name;
-    nameDiv.innerHTML = name + "<span class='percent'>" + node.percent + "%</span><span class='time'>" + node.timeMs + " ms</span><span class='bar'><span class='bar-inner' style='width: " + node.percent + "%'></span></span>";
+    nameDiv.innerHTML = name + "<span class='percent'>" + node['percent'] + "%</span><span class='time'>" + node['timeMs'] + " ms</span><span class='bar'><span class='bar-inner' style='width: " + node['percent'] + "%'></span></span>";
     div.appendChild(nameDiv);
     nameDiv.addEventListener("click", nameClicked);
     nameDiv.addEventListener("mouseenter", nameMouseEnter);
@@ -122,20 +129,17 @@ function processJson(rootDiv) {
     for (const [key, value] of Object.entries(json)) processNode(key, value, rootDiv);
 }
 
-
 function extractTime(el) {
-    var text = el.querySelector(":scope > .name").querySelector(":scope > .time").innerText.replace(/[^0-9]/, "");
-    return parseInt(text);
+    return parseInt(el.querySelector(":scope > .name").querySelector(":scope > .time").innerText.replace(/[^0-9]/, ""));
 }
 
-
-function nameMouseEnter(event) {
+function nameMouseEnter() {
     var thisTime = null;
     overlay.innerHTML = '';
     var parent = this.parentElement;
     while (!parent.classList.contains("stack")) {
         if(parent.classList.contains("node")) {
-            var time = extractTime(parent);
+            let time = extractTime(parent);
             if (thisTime == null) {
                 thisTime = time;
             } else {
@@ -148,3 +152,5 @@ function nameMouseEnter(event) {
         parent = parent.parentElement;
     }
 }
+
+loadFromServer();

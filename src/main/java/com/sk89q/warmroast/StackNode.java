@@ -18,7 +18,8 @@
 
 package com.sk89q.warmroast;
 
-import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,16 +30,12 @@ import java.util.Map;
 
 public class StackNode implements Comparable<StackNode> {
 
-    private final String name;
+    final String name;
     private final Map<String, StackNode> children = new HashMap<>();
-    private long totalTime;
+    long totalTime;
 
     public StackNode(String name) {
         this.name = name;
-    }
-    
-    public String getName() {
-        return name;
     }
 
     private Collection<StackNode> getChildren() {
@@ -47,35 +44,18 @@ public class StackNode implements Comparable<StackNode> {
         return list;
     }
     
-    public StackNode getChild(String name) {
-        StackNode child = children.get(name);
-        if (child == null) {
-            child = new StackNode(name);
-            children.put(name, child);
-        }
-        return child;
-    }
-    
     private StackNode getChild(String className, String methodName) {
         StackTraceNode node = new StackTraceNode(className, methodName);
-        StackNode child = children.get(node.getName());
+        StackNode child = children.get(node.name);
         if (child == null) {
             child = node;
-            children.put(node.getName(), node);
+            children.put(node.name, node);
         }
         return child;
-    }
-    
-    public long getTotalTime() {
-        return totalTime;
-    }
-
-    private void log(long time) {
-        totalTime += time;
     }
     
     private void log(StackTraceElement[] elements, int skip, long time) {
-        log(time);
+        totalTime +=time;
         
         if (elements.length - skip == 0) {
             return;
@@ -92,20 +72,20 @@ public class StackNode implements Comparable<StackNode> {
 
     @Override
     public int compareTo(StackNode o) {
-        return getName().compareTo(o.getName());
+        return name.compareTo(o.name);
     }
 
-    public void writeJSON(PrintWriter out) {
-        writeJSON(out, getTotalTime());
+    public void writeJSON(Writer out) throws IOException {
+        writeJSON(out, totalTime);
     }
 
-    private void writeJSON(PrintWriter out, long totalTime) {
+    private void writeJSON(Writer out, long totalTime) throws IOException {
         out.write("\"");
         out.write(name.replace("\\", "\\\\").replace("\"", "\\\""));
         out.write("\":{\"timeMs\":");
-        out.write(Long.toString(getTotalTime()));
+        out.write(Long.toString(totalTime));
         out.write(",\"percent\":");
-        out.write(String.format("%.2f", getTotalTime() / (double) totalTime * 100));
+        out.write(String.format("%.2f", totalTime / (double) totalTime * 100));
         out.write(",\"children\":{");
         for(Iterator<StackNode> it = getChildren().iterator(); it.hasNext();) {
             it.next().writeJSON(out, totalTime);
@@ -122,9 +102,9 @@ public class StackNode implements Comparable<StackNode> {
         String padding = b.toString();
         
         for (StackNode child : getChildren()) {
-            builder.append(padding).append(child.getName());
+            builder.append(padding).append(child.name);
             builder.append(" ");
-            builder.append(getTotalTime()).append("ms");
+            builder.append(totalTime).append("ms");
             builder.append("\n");
             child.writeString(builder, indent + 1);
         }
