@@ -146,7 +146,7 @@ public class WarmRoast extends TimerTask {
             }
             
             StackNode node = getNode(threadName);
-            node.log(stack, interval);
+            node.update(stack, interval);
         }
     }
 

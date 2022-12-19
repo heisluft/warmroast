@@ -152,5 +152,3 @@ function nameMouseEnter() {
         parent = parent.parentElement;
     }
 }
-
-loadFromServer();

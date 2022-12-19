@@ -54,20 +54,15 @@ public class StackNode implements Comparable<StackNode> {
         return child;
     }
     
-    private void log(StackTraceElement[] elements, int skip, long time) {
-        totalTime +=time;
-        
-        if (elements.length - skip == 0) {
-            return;
-        }
-        
+    private void update(StackTraceElement[] elements, int skip, long time) {
+        totalTime += time;
+        if (elements.length - skip == 0) return;
         StackTraceElement bottom = elements[elements.length - (skip + 1)];
-        getChild(bottom.getClassName(), bottom.getMethodName())
-                .log(elements, skip + 1, time);
+        getChild(bottom.getClassName(), bottom.getMethodName()).update(elements, skip + 1, time);
     }
     
-    public void log(StackTraceElement[] elements, long time) {
-        log(elements, 0, time);
+    public void update(StackTraceElement[] elements, long time) {
+        update(elements, 0, time);
     }
 
     @Override
@@ -83,9 +78,9 @@ public class StackNode implements Comparable<StackNode> {
         out.write("\"");
         out.write(name.replace("\\", "\\\\").replace("\"", "\\\""));
         out.write("\":{\"timeMs\":");
-        out.write(Long.toString(totalTime));
+        out.write(Long.toString(this.totalTime));
         out.write(",\"percent\":");
-        out.write(String.format("%.2f", totalTime / (double) totalTime * 100));
+        out.write(String.format("%.2f", this.totalTime / (double) totalTime * 100));
         out.write(",\"children\":{");
         for(Iterator<StackNode> it = getChildren().iterator(); it.hasNext();) {
             it.next().writeJSON(out, totalTime);
